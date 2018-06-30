@@ -17,9 +17,10 @@ $dir=~s/\/$//;
 print "#Minor allele at >=$no positions define one haplogroup\n";
 opendir DH,$dir||$!;
 while(my $file=readdir(DH)){
+    next if ($_=~/-mixture.log$/); 
 	my $input=$dir."/".$file;
 	open IN,$input||$!;
-	$file=~/(\w+)(_2_20_20)?(_(pois|emp))?\.(log|hg)/;
+	$file=~/([A-Za-z0-9_-]+)(_2_20_20)?(_(pois|emp))?\.(log|hg)/;
 	my $name=$1;
 	my $fre;
 	my $no_count;

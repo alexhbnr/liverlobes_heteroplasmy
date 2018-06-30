@@ -12,26 +12,22 @@ use strict;
 my $dir=shift||die "perl search_dataset_mixture.pl [dir has all ssp] [dir has all heteroplasmy list] [outdir]\n";
 my $dir_hetero=shift||die "perl search_dataset_mixture.pl [dir has all ssp] [dir has all heteroplasmy list] [outdir]\n";
 my $outdir=shift||die "perl search_dataset_mixture.pl [dir has all ssp] [dir has all heteroplasmy list] [outdir]\n";
+my $pattern=shift||die "perl search_dataset_mixture.pl [dir has all ssp] [dir has all heteroplasmy list] [outdir] [file pattern to extract sample and tissue]\n";
 
 my @samples;
 
 my %major;
 my %minor;
 my %fre;
+my $pattern_ssp = "${pattern}.ssp";
 opendir DH,$dir ||$!;
 while(my $file=readdir(DH)){
     if ($file=~/ssp$/){
 	    my $sample;
 	    my $tissue;
-		if ($file=~/^Bl/) {
-            $file=~/(\D+)\_(\d+)/;
-            $sample=$2;
-            $tissue=$1;
-		} else {
-            $file=~/(\D+)\_(\d+\_\d)/;
-            $sample=$2;
-            $tissue=$1;
-		}
+        $file=~/$pattern_ssp/;
+        $sample=$1;
+        $tissue=$2;
 		push @samples, $sample unless (grep {$_ eq $sample} @samples);
 		open IN, "$dir"."/"."$file"||$!;
 		while(<IN>){
@@ -48,20 +44,15 @@ while(my $file=readdir(DH)){
 }
 closedir DH;
 
+my $pattern_het = "${pattern}-mixture.log";
 opendir DH,$dir_hetero ||$!;
 while(my $file=readdir(DH)) {
     if($file=~/log$/) {
 	    my $sample;
 	    my $tissue;
-		if ($file=~/^Bl/) {
-            $file=~/(\D+)\_(\d+)/;
-            $sample=$2;
-            $tissue=$1;
-		} else {
-            $file=~/(\D+)\_(\d+\_\d)/;
-            $sample=$2;
-            $tissue=$1;
-		}
+        $file=~/"$pattern_het"/;
+        $sample=$1;
+        $tissue=$2;
 
         my @hetero;
         open IN,"$dir_hetero"."/"."$file"||$!;
@@ -71,7 +62,7 @@ while(my $file=readdir(DH)) {
         }
         close IN;
 	
-        my $output="$outdir"."/"."$tissue"."_"."$sample".".mix";
+        my $output="$outdir"."/"."$sample"."_"."$tissue".".mix";
         open OUT,">$output" ||$!;
         
         foreach my $int (@samples){
